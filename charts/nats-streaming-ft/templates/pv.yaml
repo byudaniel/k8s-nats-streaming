@@ -9,10 +9,9 @@ metadata:
   name: {{ template "name" . }}
 spec:
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   capacity:
     storage: {{ .Values.pv.storageSize }}
-  nfs:
-    path: /
-    server: {{ .Values.pv.serverUrl }}
+  hostPath:
+    path: /data/pv0001/
   persistentVolumeReclaimPolicy: {{ .Values.pv.reclaimPolicy }}

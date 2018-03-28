@@ -23,24 +23,39 @@ spec:
       - name: nats-streaming
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        args:
-          - /opt/nats-streaming-server
-          - -m=8222
-          - -st=FILE
-          - --dir=/nats-datastore
-          - -ft_group=ft
-          - --cluster=nats://0.0.0.0:6222
-          - --routes=nats://{{ template "name" . }}:6222
+        command:
+         - "/bin/sh"
+         - "-ec"
+         - |
+          /nats-streaming-server -m=8222 -st=FILE --dir=/nats-datastore -clustered --cluster=nats://0.0.0.0:6222 --routes=nats://{{ template "name" . }}:6222 --cluster_log_path=/nats-cluster-log
         env:
         - name: POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
         volumeMounts:
-        - mountPath: /nats-datastore
+        - mountPath: /nats-datastore2
           name: nats-datastore
           subPath: {{ .Values.volumeSubPath }}
+        - mountPath: /nats-cluster-log2
+          name: cluster-log-store
+        ports:
+        - containerPort: 4222
+          name: client
+        - containerPort: 6222
+          name: cluster
+        - containerPort: 8222
+          name: monitor
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8222
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
       volumes:
       - name: nats-datastore
-        persistentVolumeClaim:
-          claimName: {{ template "name" . }}
+        local:
+          path: /mnt/disks/ssd1/storage2
+      - name: cluster-log-store
+        local:
+          path: /mnt/disks/ssd1/logs2

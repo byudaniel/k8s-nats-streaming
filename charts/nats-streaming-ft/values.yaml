@@ -1,7 +1,7 @@
-image: docker.io/canhnt/nats-streaming-server:v0.6.0
-imagePullPolicy: IfNotPresent
+image: nats-streaming:0.9.0-linux
+imagePullPolicy: Always
 
-replicas: 3
+replicas: 1
 
 storageSize: 1Gi
 # optional
@@ -9,5 +9,5 @@ volumeSubPath: nats-streaming
 
 pv:
   serverUrl: 'FAKED'
-  reclaimPolicy: Retain
+  reclaimPolicy: Recycle
   storageSize: 2Gi
