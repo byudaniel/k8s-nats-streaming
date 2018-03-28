@@ -24,10 +24,15 @@ spec:
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         command:
-         - "/bin/sh"
+         - "/bin/bash"
          - "-ec"
          - |
-          /nats-streaming-server -m=8222 -st=FILE --dir=/nats-datastore -clustered --cluster=nats://0.0.0.0:6222 --routes=nats://{{ template "name" . }}:6222 --cluster_log_path=/nats-cluster-log
+          CLUSTER_BOOTSTRAP=""
+          echo $(hostname)
+          if [[ "$(hostname)" =~ ^.*\-0$ ]]; then
+            CLUSTER_BOOTSTRAP="-cluster_bootstrap"
+          fi
+          /opt/nats-streaming-server -m=8222 -st=FILE --dir=/nats-datastore -clustered ${CLUSTER_BOOTSTRAP} --cluster=nats://0.0.0.0:6222 --routes=nats://{{ template "name" . }}:6222 --cluster_log_path=/nats-cluster-log
         env:
         - name: POD_NAME
           valueFrom:
